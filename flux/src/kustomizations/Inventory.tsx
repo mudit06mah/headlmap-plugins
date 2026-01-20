@@ -46,13 +46,18 @@ export function GetResourcesFromInventory(
       });
 
       resourceClass.apiGet(
-        data => {
+        (data: KubeObject) => {
           // add the resource if it does not exist yet, compare with uid.
+          let resource = data;
+          if (data.jsonData && data.jsonData.jsonData){
+            resource = new resourceClass(data.jsonData)
+          }
+        
           setResources(prevResources => {
-            if (prevResources.find(r => r.metadata.uid === data.metadata.uid)) {
+            if (prevResources.find(r => r.metadata.uid === resource.metadata.uid)) {
               return prevResources;
             }
-            return [...prevResources, data];
+            return [...prevResources, resource];
           });
         },
         name,
@@ -62,7 +67,7 @@ export function GetResourcesFromInventory(
           setResources(prevResources => {
             return [...prevResources, resource as KubeObject];
           });
-        }
+        }        
       )();
     });
   }, []);
